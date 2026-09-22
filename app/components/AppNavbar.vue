@@ -1,14 +1,18 @@
 <script setup lang="ts">
+interface NavLink {
+  to: string
+  label: string
+}
+
 const { user, logout } = useAuth()
-const mobileOpen = ref(false)
+const mobileOpen = ref<boolean>(false)
 const route = useRoute()
 
-const navLinks = computed(() => [
+const navLinks = computed<NavLink[]>(() => [
   { to: '/', label: '首頁月曆' },
   ...(user.value
     ? [
         { to: '/my-bookings', label: '我的預約' },
-        { to: '/profile', label: '個人設定' },
       ]
     : []),
 ])
@@ -34,23 +38,23 @@ function handleLogout() {
           </svg>
         </span>
         <span class="whitespace-nowrap text-base font-bold text-slate-900 sm:text-lg">
-          群組桌球<span class="text-emerald-600">預約系統</span>
+          群組<span class="text-emerald-600">預約系統</span>
         </span>
       </NuxtLink>
 
-      <nav class="hidden items-center gap-8 md:flex">
-        <NuxtLink
-          v-for="link in navLinks"
-          :key="link.to"
-          :to="link.to"
-          class="relative py-1 text-sm font-medium text-slate-500 transition hover:text-slate-900"
-          active-class="!text-slate-900 after:absolute after:-bottom-[21px] after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-emerald-600"
-        >
-          {{ link.label }}
-        </NuxtLink>
-      </nav>
+      <div class="hidden items-center gap-8 md:flex">
+        <nav class="flex items-center gap-8">
+          <NuxtLink
+            v-for="link in navLinks"
+            :key="link.to"
+            :to="link.to"
+            class="relative py-1 text-sm font-medium text-slate-500 transition hover:text-slate-900"
+            active-class="!text-slate-900 after:absolute after:-bottom-[21px] after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-emerald-600"
+          >
+            {{ link.label }}
+          </NuxtLink>
+        </nav>
 
-      <div class="hidden items-center md:flex">
         <NuxtLink
           v-if="!user"
           to="/login"
@@ -60,14 +64,19 @@ function handleLogout() {
         </NuxtLink>
         <div v-else class="group relative">
           <button class="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 transition hover:bg-slate-100">
-            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700">
+            <span
+              class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold text-white"
+              :style="{ backgroundColor: user.color }"
+            >
               {{ user.name.charAt(0) }}
             </span>
             <span class="text-sm font-semibold text-slate-800">{{ user.name }}</span>
           </button>
-          <div class="invisible absolute right-0 top-full z-40 mt-1 w-40 rounded-lg border border-slate-200 bg-white py-1 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">
-            <NuxtLink to="/profile" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">個人設定</NuxtLink>
-            <button class="block w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-red-50" @click="handleLogout">登出</button>
+          <div class="invisible absolute right-0 top-full z-40 pt-1 opacity-0 transition group-hover:visible group-hover:opacity-100">
+            <div class="whitespace-nowrap rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+              <NuxtLink to="/profile" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">個人設定</NuxtLink>
+              <button class="block w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-red-50" @click="handleLogout">登出</button>
+            </div>
           </div>
         </div>
       </div>
@@ -104,7 +113,10 @@ function handleLogout() {
         </NuxtLink>
         <div v-else class="flex items-center justify-between px-2">
           <div class="flex items-center gap-2">
-            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700">
+            <span
+              class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold text-white"
+              :style="{ backgroundColor: user.color }"
+            >
               {{ user.name.charAt(0) }}
             </span>
             <span class="text-sm font-semibold text-slate-800">{{ user.name }}</span>

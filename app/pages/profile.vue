@@ -1,5 +1,5 @@
 <script setup lang="ts">
-useHead({ title: '個人設定 · 群組桌球預約系統' })
+useHead({ title: '個人設定 · 群組預約系統' })
 
 definePageMeta({
   middleware: [
@@ -10,46 +10,51 @@ definePageMeta({
   ],
 })
 
-const { user, updateName } = useAuth()
+const { user, updateName, updateColor } = useAuth()
 
-const displayName = ref(user.value?.name ?? '')
+const displayName = ref<string>(user.value?.name ?? '')
 watch(
   () => user.value?.name,
-  (name) => {
+  (name: string | undefined) => {
     if (name) displayName.value = name
   },
 )
 
-const nameMessage = ref('')
-function saveName() {
-  if (!displayName.value.trim()) return
-  updateName(displayName.value)
-  nameMessage.value = '姓名已更新'
-  setTimeout(() => (nameMessage.value = ''), 2000)
-}
+const displayColor = ref<string>(user.value?.color ?? '#10b981')
+watch(
+  () => user.value?.color,
+  (color: string | undefined) => {
+    if (color) displayColor.value = color
+  },
+)
 
-const newPassword = ref('')
-const confirmPassword = ref('')
-const passwordMessage = ref('')
-const passwordError = ref('')
+const newPassword = ref<string>('')
+const confirmPassword = ref<string>('')
+const saveMessage = ref<string>('')
+const passwordError = ref<string>('')
 
-function changePassword() {
+function saveAll() {
   passwordError.value = ''
-  passwordMessage.value = ''
+  saveMessage.value = ''
 
-  if (!newPassword.value || newPassword.value.length < 6) {
-    passwordError.value = '密碼長度至少需要 6 個字元'
-    return
-  }
-  if (newPassword.value !== confirmPassword.value) {
-    passwordError.value = '兩次輸入的密碼不一致'
-    return
+  if (newPassword.value || confirmPassword.value) {
+    if (newPassword.value.length < 6) {
+      passwordError.value = '密碼長度至少需要 6 個字元'
+      return
+    }
+    if (newPassword.value !== confirmPassword.value) {
+      passwordError.value = '兩次輸入的密碼不一致'
+      return
+    }
   }
 
-  passwordMessage.value = '密碼已更新'
+  if (displayName.value.trim()) updateName(displayName.value)
+  updateColor(displayColor.value)
   newPassword.value = ''
   confirmPassword.value = ''
-  setTimeout(() => (passwordMessage.value = ''), 2000)
+
+  saveMessage.value = '設定已儲存'
+  setTimeout(() => (saveMessage.value = ''), 2000)
 }
 </script>
 
@@ -61,7 +66,10 @@ function changePassword() {
 
     <div class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
       <div class="flex items-center gap-4">
-        <span class="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-xl font-semibold text-emerald-700">
+        <span
+          class="flex h-14 w-14 items-center justify-center rounded-full text-xl font-semibold text-white"
+          :style="{ backgroundColor: user.color }"
+        >
           {{ user.name.charAt(0) }}
         </span>
         <div>
@@ -77,23 +85,36 @@ function changePassword() {
           <p class="font-semibold text-slate-800">基本資料</p>
           <p class="mt-1 text-sm text-slate-400">這些資料會顯示在群組名單中。</p>
         </div>
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-start">
-          <div class="flex-1">
-            <label class="mb-1.5 block text-sm font-semibold text-slate-700">顯示姓名</label>
+        <div>
+          <label class="mb-1.5 block text-sm font-semibold text-slate-700">顯示姓名</label>
+          <input
+            v-model="displayName"
+            type="text"
+            class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+          >
+        </div>
+      </div>
+
+      <div class="my-7 border-t border-slate-100" />
+
+      <div class="grid gap-4 sm:grid-cols-[200px_1fr]">
+        <div>
+          <p class="font-semibold text-slate-800">代表色</p>
+          <p class="mt-1 text-sm text-slate-400">用於顯示你的頭像顏色。</p>
+        </div>
+        <div>
+          <label class="mb-1.5 block text-sm font-semibold text-slate-700">選擇顏色</label>
+          <div class="flex items-center gap-2.5">
             <input
-              v-model="displayName"
+              v-model="displayColor"
+              type="color"
+              class="h-10 w-14 cursor-pointer rounded-lg border border-slate-200 p-1"
+            >
+            <input
+              v-model="displayColor"
               type="text"
               class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
             >
-          </div>
-          <div class="flex flex-col items-start gap-1.5 sm:pt-6">
-            <button
-              class="rounded-lg border border-emerald-600 px-5 py-2.5 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-50"
-              @click="saveName"
-            >
-              更新姓名
-            </button>
-            <p v-if="nameMessage" class="text-xs font-medium text-emerald-600">{{ nameMessage }}</p>
           </div>
         </div>
       </div>
@@ -126,17 +147,20 @@ function changePassword() {
               >
             </div>
           </div>
-          <div class="mt-4 flex flex-col items-start gap-1.5">
-            <button
-              class="rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-              @click="changePassword"
-            >
-              變更密碼
-            </button>
-            <p v-if="passwordMessage" class="text-xs font-medium text-emerald-600">{{ passwordMessage }}</p>
-            <p v-if="passwordError" class="text-xs font-medium text-red-500">{{ passwordError }}</p>
-          </div>
+          <p v-if="passwordError" class="mt-2 text-xs font-medium text-red-500">{{ passwordError }}</p>
         </div>
+      </div>
+
+      <div class="my-7 border-t border-slate-100" />
+
+      <div class="flex items-center justify-end gap-3">
+        <p v-if="saveMessage" class="text-xs font-medium text-emerald-600">{{ saveMessage }}</p>
+        <button
+          class="rounded-lg bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+          @click="saveAll"
+        >
+          儲存
+        </button>
       </div>
     </div>
   </div>

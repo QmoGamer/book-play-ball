@@ -1,5 +1,5 @@
 <script setup lang="ts">
-useHead({ title: '我的預約 · 群組桌球預約系統' })
+useHead({ title: '我的預約 · 群組預約系統' })
 
 definePageMeta({
   middleware: [

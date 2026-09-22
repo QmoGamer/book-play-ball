@@ -1,5 +1,5 @@
 <script setup lang="ts">
-useHead({ title: '首頁月曆 · 群組桌球預約系統' })
+useHead({ title: '首頁月曆 · 群組預約系統' })
 
 const { user } = useAuth()
 const { listFor } = useBookings()
@@ -7,14 +7,14 @@ const { listFor } = useBookings()
 const today = new Date()
 const todayKey = formatDateKey(today)
 
-const viewYear = ref(today.getFullYear())
-const viewMonth = ref(today.getMonth())
+const viewYear = ref<number>(today.getFullYear())
+const viewMonth = ref<number>(today.getMonth())
 
-const grid = computed(() => buildMonthGrid(viewYear.value, viewMonth.value))
+const grid = computed<CalendarCell[]>(() => buildMonthGrid(viewYear.value, viewMonth.value))
 
-const MAX_VISIBLE = 3
+const MAX_VISIBLE: number = 3
 
-function prevMonth() {
+function prevMonth(): void {
   if (viewMonth.value === 0) {
     viewMonth.value = 11
     viewYear.value -= 1
@@ -23,7 +23,7 @@ function prevMonth() {
   }
 }
 
-function nextMonth() {
+function nextMonth(): void {
   if (viewMonth.value === 11) {
     viewMonth.value = 0
     viewYear.value += 1
@@ -32,15 +32,15 @@ function nextMonth() {
   }
 }
 
-function goToday() {
+function goToday(): void {
   viewYear.value = today.getFullYear()
   viewMonth.value = today.getMonth()
 }
 
-const modalOpen = ref(false)
+const modalOpen = ref<boolean>(false)
 const activeDateKey = ref<string | null>(null)
 
-function openDay(key: string) {
+function openDay(key: string): void {
   activeDateKey.value = key
   modalOpen.value = true
 }
@@ -57,7 +57,7 @@ onMounted(() => {
 <template>
   <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6">
     <p class="text-xs font-bold tracking-widest text-emerald-600">GROUP BOARD · 共享看板</p>
-    <h1 class="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">大家什麼時候打球？</h1>
+    <h1 class="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">大家什麼時候打球？</h1>
     <p class="mt-2 text-slate-500">選擇一天，看看誰已經預約，一起組隊開打。</p>
 
     <div class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -134,12 +134,6 @@ onMounted(() => {
             </button>
           </div>
         </div>
-      </div>
-
-      <div class="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-slate-100 px-4 py-4 text-xs text-slate-500 sm:px-6">
-        <span class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-emerald-500" /> 我的預約</span>
-        <span class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-indigo-400" /> 其他球友</span>
-        <span>點擊日期查看完整名單</span>
       </div>
     </div>
 

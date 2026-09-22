@@ -8,7 +8,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   app: {
     head: {
-      title: '群組桌球預約系統',
+      title: '群組預約系統',
       htmlAttrs: { lang: 'zh-Hant' }
     }
   }
