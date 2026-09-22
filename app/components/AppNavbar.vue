@@ -91,7 +91,7 @@ function handleLogout() {
       </button>
     </div>
 
-    <div v-if="mobileOpen" class="border-t border-slate-100 px-4 pb-4 md:hidden">
+    <div v-if="mobileOpen" class="absolute inset-x-0 top-full border-t border-slate-100 bg-white px-4 pb-4 shadow-lg md:hidden">
       <nav class="flex flex-col py-2">
         <NuxtLink
           v-for="link in navLinks"
