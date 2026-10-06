@@ -2,5 +2,6 @@
   <NuxtLayout>
     <NuxtRouteAnnouncer />
     <NuxtPage />
+    <AppToast />
   </NuxtLayout>
 </template>

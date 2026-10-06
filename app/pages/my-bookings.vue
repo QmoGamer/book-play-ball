@@ -23,11 +23,19 @@ function rowInfo(key: string) {
   return { month: m, day: String(d).padStart(2, '0'), weekday: WEEKDAYS[date.getDay()] }
 }
 
+const toast = useToast()
+const cancelingKey = ref<string | null>(null)
+
 async function cancel(key: string) {
+  if (cancelingKey.value) return
+  cancelingKey.value = key
   try {
     await leave(key)
+    toast.success(`已取消 ${formatDateLabel(key)} 的預約`)
   } catch (error: any) {
-    alert(error.message)
+    toast.error(`取消失敗：${error.message}`)
+  } finally {
+    cancelingKey.value = null
   }
 }
 </script>
@@ -71,8 +79,16 @@ async function cancel(key: string) {
               <p class="text-sm text-slate-500">{{ MOCK_EVENT.time }} · {{ MOCK_EVENT.venue }}</p>
             </div>
           </div>
-          <button class="rounded-lg bg-red-50 px-4 py-2 text-sm font-semibold text-red-500 transition hover:bg-red-100" @click="cancel(key)">
-            ❌ 取消預約
+          <button
+            :disabled="!!cancelingKey"
+            class="flex items-center gap-2 rounded-lg bg-red-50 px-4 py-2 text-sm font-semibold text-red-500 transition hover:bg-red-100 disabled:cursor-wait disabled:opacity-60"
+            @click="cancel(key)"
+          >
+            <template v-if="cancelingKey === key">
+              <AppSpinner />
+              取消中…
+            </template>
+            <template v-else>❌ 取消預約</template>
           </button>
         </div>
       </template>

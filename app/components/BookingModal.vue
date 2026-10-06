@@ -11,6 +11,9 @@ const emit = defineEmits<{
 const { user } = useAuth()
 const { listFor, isBooked, join, leave } = useBookings()
 const router = useRouter()
+const toast = useToast()
+const pending = ref<boolean>(false)
+const pendingLabel = ref<string>('')
 
 const participants = computed(() => (props.dateKey ? listFor(props.dateKey) : []))
 const isMineBooked = computed(() => (props.dateKey ? isBooked(props.dateKey) : false))
@@ -38,14 +41,25 @@ async function handlePrimaryAction() {
     return
   }
 
+  if (pending.value) return
+  pending.value = true
+  // 動作開始時就記住，避免同步資料先回來讓按鈕文字提早翻轉
+  const wasBooked = isMineBooked.value
+  pendingLabel.value = wasBooked ? '取消中…' : '預約中…'
+  const dateLabel = formatDateLabel(props.dateKey)
   try {
-    if (isMineBooked.value) {
+    if (wasBooked) {
       await leave(props.dateKey)
+      toast.success(`已取消 ${dateLabel} 的預約`)
     } else {
       await join(props.dateKey)
+      toast.success(`已預約 ${dateLabel}，到時候見！`)
     }
+    close()
   } catch (error: any) {
-    alert(error.message)
+    toast.error(`${wasBooked ? '取消' : '預約'}失敗：${error.message}`)
+  } finally {
+    pending.value = false
   }
 }
 </script>
@@ -95,11 +109,18 @@ async function handlePrimaryAction() {
           <div v-else class="mt-4 border-t border-slate-100" />
 
           <button
-            class="mt-6 w-full rounded-xl py-3 text-sm font-bold text-white transition"
+            :disabled="pending"
+            class="mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white transition disabled:cursor-wait disabled:opacity-70"
             :class="isMineBooked ? 'bg-red-500 hover:bg-red-600' : 'bg-emerald-600 hover:bg-emerald-700'"
             @click="handlePrimaryAction"
           >
-            {{ !user ? '前往登入 →' : isMineBooked ? '❌ 取消我的預約' : '確認預約這天' }}
+            <template v-if="pending">
+              <AppSpinner />
+              {{ pendingLabel }}
+            </template>
+            <template v-else>
+              {{ !user ? '前往登入 →' : isMineBooked ? '❌ 取消我的預約' : '確認預約這天' }}
+            </template>
           </button>
           <p class="mt-3 text-center text-xs text-slate-400">
             {{ !user ? '登入後即可預約這天，和大家一起揮拍。' : '你可以隨時在「我的預約」中管理已加入的日期' }}

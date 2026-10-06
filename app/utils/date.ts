@@ -8,6 +8,12 @@ export function formatDateKey(date: Date) {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`
 }
 
+/** 2026-10-20 -> 10/20 */
+export function formatDateLabel(key: string) {
+  const [, m, d] = key.split('-').map(Number)
+  return `${m}/${d}`
+}
+
 export function addDays(date: Date, amount: number) {
   const result = new Date(date)
   result.setDate(result.getDate() + amount)

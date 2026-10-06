@@ -25,13 +25,22 @@ onMounted(() => {
 })
 
 const nickname = ref<string>('')
+const submitting = ref<boolean>(false)
+const toast = useToast()
 
 async function submit(): Promise<void> {
+  if (submitting.value) return
+  submitting.value = true
   try {
     await login(nickname.value)
-    if (user.value) router.push(redirectTarget())
+    if (user.value) {
+      toast.success(`歡迎，${user.value.name}！`)
+      await router.push(redirectTarget())
+    }
   } catch (error: any) {
-    alert(error.message)
+    toast.error(`登入失敗：${error.message}`)
+  } finally {
+    submitting.value = false
   }
 }
 </script>
@@ -61,15 +70,21 @@ async function submit(): Promise<void> {
             type="text"
             placeholder="輸入暱稱"
             required
+            :disabled="submitting"
             class="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
           >
         </div>
 
         <button
           type="submit"
-          class="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
+          :disabled="submitting"
+          class="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white transition hover:bg-emerald-700 disabled:cursor-wait disabled:opacity-70"
         >
-          開始 →
+          <template v-if="submitting">
+            <AppSpinner />
+            登入中…
+          </template>
+          <template v-else>開始 →</template>
         </button>
       </form>
     </div>

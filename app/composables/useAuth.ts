@@ -43,9 +43,12 @@ export function useAuth() {
       user.value = null
       return
     }
+    // login() 已經設好同一位使用者時不必重讀，也避免讀到尚未寫入的文件而把 user 清空
+    if (user.value?.uid === fbUser.uid) return
+
     const snapshot = await getDoc(doc($fbDb, 'users', fbUser.uid))
     // 已登入但還沒寫過暱稱，視同未登入，讓使用者到登入頁補填
-    user.value = snapshot.exists() ? toAppUser(snapshot.data() as UserDoc) : null
+    if (snapshot.exists()) user.value = toAppUser(snapshot.data() as UserDoc)
   }
 
   async function login(nickname: string) {
@@ -59,13 +62,17 @@ export function useAuth() {
 
     // createdAt、color 只在首次建立文件時寫入，之後只更新暱稱
     const isNewUser = getAdditionalUserInfo(credential)?.isNewUser ?? false
-    const exists = !isNewUser && (await getDoc(ref)).exists()
-    const data: UserDoc = exists
-      ? { uid, name }
-      : { uid, name, color: DEFAULT_COLOR, createdAt: new Date().toISOString() }
-    await setDoc(ref, data, { merge: true })
+    const snapshot = isNewUser ? null : await getDoc(ref)
+    const existing = snapshot?.exists() ? (snapshot.data() as UserDoc) : null
 
-    await syncUser(credential.user)
+    if (existing) {
+      await updateDoc(ref, { name })
+      user.value = toAppUser({ ...existing, name })
+    } else {
+      const data: UserDoc = { uid, name, color: DEFAULT_COLOR, createdAt: new Date().toISOString() }
+      await setDoc(ref, data)
+      user.value = toAppUser(data)
+    }
   }
 
   async function logout() {

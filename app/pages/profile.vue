@@ -54,7 +54,7 @@ async function saveAll() {
     if (displayName.value.trim()) await updateName(displayName.value)
     await updateColor(displayColor.value)
   } catch (error: any) {
-    alert(error.message)
+    useToast().error(`儲存失敗：${error.message}`)
     return
   }
   newPassword.value = ''

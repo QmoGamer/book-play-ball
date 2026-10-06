@@ -21,8 +21,20 @@ watch(() => route.fullPath, () => {
   mobileOpen.value = false
 })
 
+const toast = useToast()
+const loggingOut = ref<boolean>(false)
+
 async function handleLogout() {
-  await logout()
+  if (loggingOut.value) return
+  loggingOut.value = true
+  try {
+    await logout()
+    toast.success('已登出')
+  } catch (error: any) {
+    toast.error(`登出失敗：${error.message}`)
+  } finally {
+    loggingOut.value = false
+  }
   mobileOpen.value = false
 }
 </script>
@@ -76,7 +88,7 @@ async function handleLogout() {
             <div class="whitespace-nowrap rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
               <!-- 個人設定頁暫時隱藏 -->
               <!-- <NuxtLink to="/profile" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">個人設定</NuxtLink> -->
-              <button class="block w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-red-50" @click="handleLogout">登出</button>
+              <button :disabled="loggingOut" class="block w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-red-50 disabled:opacity-60" @click="handleLogout">{{ loggingOut ? '登出中…' : '登出' }}</button>
             </div>
           </div>
         </div>
@@ -122,7 +134,7 @@ async function handleLogout() {
             </span>
             <span class="text-sm font-semibold text-slate-800">{{ user.name }}</span>
           </div>
-          <button class="text-sm font-semibold text-red-500" @click="handleLogout">登出</button>
+          <button :disabled="loggingOut" class="text-sm font-semibold text-red-500 disabled:opacity-60" @click="handleLogout">{{ loggingOut ? '登出中…' : '登出' }}</button>
         </div>
       </div>
     </div>
