@@ -1,8 +1,7 @@
 <script setup lang="ts">
 useHead({ title: '首頁月曆 · 群組預約系統' })
 
-const { user } = useAuth()
-const { listFor } = useBookings()
+const { listFor, isBooked } = useBookings()
 
 const today = new Date()
 const todayKey = formatDateKey(today)
@@ -112,18 +111,18 @@ onMounted(() => {
             <span
               v-if="cell.inCurrentMonth && listFor(cell.key).length"
               class="h-1.5 w-1.5 rounded-full"
-              :class="user && listFor(cell.key).includes(user.name) ? 'bg-emerald-500' : 'bg-indigo-400'"
+              :class="isBooked(cell.key) ? 'bg-emerald-500' : 'bg-indigo-400'"
             />
           </div>
 
           <div v-if="cell.inCurrentMonth" class="mt-1.5 space-y-1">
             <div
-              v-for="(name, idx) in listFor(cell.key).slice(0, MAX_VISIBLE)"
-              :key="name"
+              v-for="(entry, idx) in listFor(cell.key).slice(0, MAX_VISIBLE)"
+              :key="entry.uid"
               class="truncate rounded-md px-1.5 py-0.5 text-[11px] font-medium sm:text-xs"
               :class="[chipStyle(idx).bg, chipStyle(idx).text]"
             >
-              {{ name }}
+              {{ entry.name }}
             </div>
             <button
               v-if="listFor(cell.key).length > MAX_VISIBLE"

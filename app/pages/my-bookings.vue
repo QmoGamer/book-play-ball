@@ -15,7 +15,7 @@ const { myBookings, leave } = useBookings()
 
 const activeTab = ref<'upcoming' | 'past'>('upcoming')
 
-const lists = computed(() => (user.value ? myBookings(user.value.name) : { upcoming: [], past: [] }))
+const lists = computed(() => (user.value ? myBookings() : { upcoming: [], past: [] }))
 
 function rowInfo(key: string) {
   const [y, m, d] = key.split('-').map(Number)
@@ -23,8 +23,12 @@ function rowInfo(key: string) {
   return { month: m, day: String(d).padStart(2, '0'), weekday: WEEKDAYS[date.getDay()] }
 }
 
-function cancel(key: string) {
-  if (user.value) leave(key, user.value.name)
+async function cancel(key: string) {
+  try {
+    await leave(key)
+  } catch (error: any) {
+    alert(error.message)
+  }
 }
 </script>
 

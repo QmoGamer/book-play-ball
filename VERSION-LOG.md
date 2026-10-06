@@ -1,5 +1,13 @@
 # VERSION-LOG
 
+### v0.4.0 - 2026-10-06
+
+- feat(bookings): 預約資料改存 Firestore 的 bookings 集合，取代寫死的示範資料，讓群組成員的預約真正共用
+- feat(bookings): 新增即時同步預約的 plugin，有人預約或取消時所有人不用重新整理就能看到
+- refactor(bookings): 預約身分改用 uid 比對，避免同名使用者被誤判為同一人
+- fix(booking-modal): 預約或取消失敗時跳出錯誤提示，避免使用者以為已完成操作
+- fix(my-bookings): 取消預約失敗時跳出錯誤提示
+
 ### v0.3.0 - 2026-10-06
 
 - feat(auth): 改用 Firebase 匿名登入並將暱稱、代表色存入 Firestore，重新整理後仍能維持登入身分

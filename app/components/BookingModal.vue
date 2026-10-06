@@ -9,11 +9,11 @@ const emit = defineEmits<{
 }>()
 
 const { user } = useAuth()
-const { listFor, join, leave } = useBookings()
+const { listFor, isBooked, join, leave } = useBookings()
 const router = useRouter()
 
 const participants = computed(() => (props.dateKey ? listFor(props.dateKey) : []))
-const isMineBooked = computed(() => !!user.value && participants.value.includes(user.value.name))
+const isMineBooked = computed(() => (props.dateKey ? isBooked(props.dateKey) : false))
 
 const WEEKDAY_LABELS = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
 
@@ -28,7 +28,7 @@ function close() {
   emit('update:modelValue', false)
 }
 
-function handlePrimaryAction() {
+async function handlePrimaryAction() {
   if (!props.dateKey) return
 
   if (!user.value) {
@@ -38,10 +38,14 @@ function handlePrimaryAction() {
     return
   }
 
-  if (isMineBooked.value) {
-    leave(props.dateKey, user.value.name)
-  } else {
-    join(props.dateKey, user.value.name)
+  try {
+    if (isMineBooked.value) {
+      await leave(props.dateKey)
+    } else {
+      await join(props.dateKey)
+    }
+  } catch (error: any) {
+    alert(error.message)
   }
 }
 </script>
@@ -72,17 +76,17 @@ function handlePrimaryAction() {
           <p class="mt-2 text-sm text-slate-500">已有 {{ participants.length }} 位球友加入這場練習</p>
 
           <div v-if="participants.length" class="mt-4 max-h-64 divide-y divide-slate-100 overflow-y-auto border-t border-slate-100">
-            <div v-for="(name, idx) in participants" :key="name" class="flex items-center justify-between py-3">
+            <div v-for="(entry, idx) in participants" :key="entry.uid" class="flex items-center justify-between py-3">
               <div class="flex items-center gap-3">
                 <span
                   class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
                   :class="chipStyle(idx).avatarBg"
                 >
-                  {{ name.charAt(0) }}
+                  {{ entry.name.charAt(0) }}
                 </span>
                 <span class="text-sm font-medium text-slate-800">
-                  {{ name }}
-                  <span v-if="user && name === user.name" class="ml-1 text-xs font-semibold text-emerald-600">你</span>
+                  {{ entry.name }}
+                  <span v-if="user && entry.uid === user.uid" class="ml-1 text-xs font-semibold text-emerald-600">你</span>
                 </span>
               </div>
               <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5 text-emerald-500"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
