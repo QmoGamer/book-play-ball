@@ -1,5 +1,15 @@
 # VERSION-LOG
 
+### v0.3.0 - 2026-10-06
+
+- feat(auth): 改用 Firebase 匿名登入並將暱稱、代表色存入 Firestore，重新整理後仍能維持登入身分
+- feat(login): 登入頁簡化為只輸入暱稱，匿名登入不需註冊與密碼
+- feat(plugins): 新增 Firebase 初始化與登入狀態還原 plugin，確保頁面權限判斷前已取得使用者
+- fix(login): 登入後跳轉保留原本的 date 參數，回到原先查看的日期
+- refactor(profile): 個人設定頁暫時隱藏並導回首頁，待匿名登入下的設定項目調整後再開放
+- chore(config): 關閉 SSR，避免伺服器端讀不到瀏覽器登入狀態而誤導回登入頁
+- chore(deps): 新增 firebase 套件
+
 ### v0.2.1 - 2026-09-22
 
 - fix(navbar): 手機版選單改為懸浮在頁面內容上方，展開時不再把頁面往下推

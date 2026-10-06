@@ -1,6 +1,6 @@
 {
   "name": "book-play-ball",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "type": "module",
   "private": true,
   "scripts": {
@@ -11,6 +11,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "firebase": "^12.19.0",
     "nuxt": "^4.5.2",
     "vue": "^3.5.43",
     "vue-router": "^5.3.1"

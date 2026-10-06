@@ -21,8 +21,8 @@ watch(() => route.fullPath, () => {
   mobileOpen.value = false
 })
 
-function handleLogout() {
-  logout()
+async function handleLogout() {
+  await logout()
   mobileOpen.value = false
 }
 </script>
@@ -74,7 +74,8 @@ function handleLogout() {
           </button>
           <div class="invisible absolute right-0 top-full z-40 pt-1 opacity-0 transition group-hover:visible group-hover:opacity-100">
             <div class="whitespace-nowrap rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
-              <NuxtLink to="/profile" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">個人設定</NuxtLink>
+              <!-- 個人設定頁暫時隱藏 -->
+              <!-- <NuxtLink to="/profile" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50">個人設定</NuxtLink> -->
               <button class="block w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-red-50" @click="handleLogout">登出</button>
             </div>
           </div>

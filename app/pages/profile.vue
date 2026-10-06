@@ -3,6 +3,8 @@ useHead({ title: '個人設定 · 群組預約系統' })
 
 definePageMeta({
   middleware: [
+    // 個人設定頁暫時隱藏，直接導回首頁；恢復時移除這段即可
+    () => navigateTo('/'),
     () => {
       const { user } = useAuth()
       if (!user.value) return navigateTo('/login')
@@ -33,7 +35,7 @@ const confirmPassword = ref<string>('')
 const saveMessage = ref<string>('')
 const passwordError = ref<string>('')
 
-function saveAll() {
+async function saveAll() {
   passwordError.value = ''
   saveMessage.value = ''
 
@@ -48,8 +50,13 @@ function saveAll() {
     }
   }
 
-  if (displayName.value.trim()) updateName(displayName.value)
-  updateColor(displayColor.value)
+  try {
+    if (displayName.value.trim()) await updateName(displayName.value)
+    await updateColor(displayColor.value)
+  } catch (error: any) {
+    alert(error.message)
+    return
+  }
   newPassword.value = ''
   confirmPassword.value = ''
 
