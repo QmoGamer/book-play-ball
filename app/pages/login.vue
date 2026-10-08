@@ -11,7 +11,12 @@ useHead({ title: '登入 · 群組預約系統' })
 const { user, login } = useAuth()
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
 
+const nickname = ref('')
+const submitting = ref(false)
+
+/** 登入後導回原本的頁面，並保留原本點選的日期 */
 function redirectTarget(): RedirectTarget {
   const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
   const date = typeof route.query.date === 'string' ? route.query.date : undefined
@@ -24,11 +29,7 @@ onMounted(() => {
   }
 })
 
-const nickname = ref<string>('')
-const submitting = ref<boolean>(false)
-const toast = useToast()
-
-async function submit(): Promise<void> {
+async function submit() {
   if (submitting.value) return
   submitting.value = true
   try {
@@ -37,8 +38,8 @@ async function submit(): Promise<void> {
       toast.success(`歡迎，${user.value.name}！`)
       await router.push(redirectTarget())
     }
-  } catch (error: any) {
-    toast.error(`登入失敗：${error.message}`)
+  } catch (error) {
+    toast.error(`登入失敗：${errorMessage(error)}`)
   } finally {
     submitting.value = false
   }
@@ -49,12 +50,7 @@ async function submit(): Promise<void> {
   <div class="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
     <div class="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
       <div class="flex items-center gap-2.5">
-        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white">
-          <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5">
-            <path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.5 2.5M16.5 16.5L19 19M19 5l-2.5 2.5M7.5 16.5L5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            <circle cx="12" cy="12" r="3" fill="currentColor" />
-          </svg>
-        </span>
+        <AppLogoIcon />
         <span class="text-base font-bold text-slate-900">群組預約系統</span>
       </div>
 
@@ -64,8 +60,9 @@ async function submit(): Promise<void> {
 
       <form class="mt-6 space-y-4" @submit.prevent="submit">
         <div>
-          <label class="mb-1.5 block text-sm font-semibold text-slate-700">暱稱</label>
+          <label for="nickname" class="mb-1.5 block text-sm font-semibold text-slate-700">暱稱</label>
           <input
+            id="nickname"
             v-model="nickname"
             type="text"
             placeholder="輸入暱稱"

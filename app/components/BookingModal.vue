@@ -12,20 +12,24 @@ const { user } = useAuth()
 const { listFor, isBooked, join, leave } = useBookings()
 const router = useRouter()
 const toast = useToast()
-const pending = ref<boolean>(false)
-const pendingLabel = ref<string>('')
+const pending = ref(false)
+const pendingLabel = ref('')
 
 const participants = computed(() => (props.dateKey ? listFor(props.dateKey) : []))
 const isMineBooked = computed(() => (props.dateKey ? isBooked(props.dateKey) : false))
 
 const WEEKDAY_LABELS = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
 
-const weekdayLabel = computed(() => {
-  if (!props.dateKey) return ''
-  const [y, m, d] = props.dateKey.split('-').map(Number)
-  const date = new Date(y!, m! - 1, d)
-  return WEEKDAY_LABELS[date.getDay()]
+const weekdayLabel = computed(() => (props.dateKey ? WEEKDAY_LABELS[parseDateKey(props.dateKey).getDay()] : ''))
+
+const primaryLabel = computed(() => {
+  if (!user.value) return '前往登入 →'
+  return isMineBooked.value ? '❌ 取消我的預約' : '確認預約這天'
 })
+
+const hintText = computed(() => (user.value
+  ? '你可以隨時在「我的預約」中管理已加入的日期'
+  : '登入後即可預約這天，和大家一起揮拍。'))
 
 function close() {
   emit('update:modelValue', false)
@@ -56,8 +60,8 @@ async function handlePrimaryAction() {
       toast.success(`已預約 ${dateLabel}，到時候見！`)
     }
     close()
-  } catch (error: any) {
-    toast.error(`${wasBooked ? '取消' : '預約'}失敗：${error.message}`)
+  } catch (error) {
+    toast.error(`${wasBooked ? '取消' : '預約'}失敗：${errorMessage(error)}`)
   } finally {
     pending.value = false
   }
@@ -118,12 +122,10 @@ async function handlePrimaryAction() {
               <AppSpinner />
               {{ pendingLabel }}
             </template>
-            <template v-else>
-              {{ !user ? '前往登入 →' : isMineBooked ? '❌ 取消我的預約' : '確認預約這天' }}
-            </template>
+            <template v-else>{{ primaryLabel }}</template>
           </button>
           <p class="mt-3 text-center text-xs text-slate-400">
-            {{ !user ? '登入後即可預約這天，和大家一起揮拍。' : '你可以隨時在「我的預約」中管理已加入的日期' }}
+            {{ hintText }}
           </p>
         </div>
       </div>

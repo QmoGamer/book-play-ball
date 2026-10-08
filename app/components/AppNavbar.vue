@@ -5,24 +5,20 @@ interface NavLink {
 }
 
 const { user, logout } = useAuth()
-const mobileOpen = ref<boolean>(false)
 const route = useRoute()
+const toast = useToast()
+
+const mobileOpen = ref(false)
+const loggingOut = ref(false)
 
 const navLinks = computed<NavLink[]>(() => [
   { to: '/', label: '首頁月曆' },
-  ...(user.value
-    ? [
-        { to: '/my-bookings', label: '我的預約' },
-      ]
-    : []),
+  ...(user.value ? [{ to: '/my-bookings', label: '我的預約' }] : []),
 ])
 
 watch(() => route.fullPath, () => {
   mobileOpen.value = false
 })
-
-const toast = useToast()
-const loggingOut = ref<boolean>(false)
 
 async function handleLogout() {
   if (loggingOut.value) return
@@ -30,8 +26,8 @@ async function handleLogout() {
   try {
     await logout()
     toast.success('已登出')
-  } catch (error: any) {
-    toast.error(`登出失敗：${error.message}`)
+  } catch (error) {
+    toast.error(`登出失敗：${errorMessage(error)}`)
   } finally {
     loggingOut.value = false
   }
@@ -43,12 +39,7 @@ async function handleLogout() {
   <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
     <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
       <NuxtLink to="/" class="flex items-center gap-2.5">
-        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm">
-          <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5">
-            <path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.5 2.5M16.5 16.5L19 19M19 5l-2.5 2.5M7.5 16.5L5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            <circle cx="12" cy="12" r="3" fill="currentColor" />
-          </svg>
-        </span>
+        <AppLogoIcon class="shadow-sm" />
         <span class="whitespace-nowrap text-base font-bold text-slate-900 sm:text-lg">
           群組<span class="text-emerald-600">預約系統</span>
         </span>
@@ -76,12 +67,7 @@ async function handleLogout() {
         </NuxtLink>
         <div v-else class="group relative">
           <button class="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 transition hover:bg-slate-100">
-            <span
-              class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold text-white"
-              :style="{ backgroundColor: user.color }"
-            >
-              {{ user.name.charAt(0) }}
-            </span>
+            <UserAvatar :name="user.name" :color="user.color" />
             <span class="text-sm font-semibold text-slate-800">{{ user.name }}</span>
           </button>
           <div class="invisible absolute right-0 top-full z-40 pt-1 opacity-0 transition group-hover:visible group-hover:opacity-100">
@@ -126,12 +112,7 @@ async function handleLogout() {
         </NuxtLink>
         <div v-else class="flex items-center justify-between px-2">
           <div class="flex items-center gap-2">
-            <span
-              class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold text-white"
-              :style="{ backgroundColor: user.color }"
-            >
-              {{ user.name.charAt(0) }}
-            </span>
+            <UserAvatar :name="user.name" :color="user.color" />
             <span class="text-sm font-semibold text-slate-800">{{ user.name }}</span>
           </div>
           <button :disabled="loggingOut" class="text-sm font-semibold text-red-500 disabled:opacity-60" @click="handleLogout">{{ loggingOut ? '登出中…' : '登出' }}</button>

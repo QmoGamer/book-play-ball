@@ -5,35 +5,27 @@ definePageMeta({
   middleware: [
     // 個人設定頁暫時隱藏，直接導回首頁；恢復時移除這段即可
     () => navigateTo('/'),
-    () => {
-      const { user } = useAuth()
-      if (!user.value) return navigateTo('/login')
-    },
+    'auth',
   ],
 })
 
 const { user, updateName, updateColor } = useAuth()
+const toast = useToast()
 
-const displayName = ref<string>(user.value?.name ?? '')
-watch(
-  () => user.value?.name,
-  (name: string | undefined) => {
-    if (name) displayName.value = name
-  },
-)
+const displayName = ref(user.value?.name ?? '')
+watch(() => user.value?.name, (name) => {
+  if (name) displayName.value = name
+})
 
-const displayColor = ref<string>(user.value?.color ?? '#10b981')
-watch(
-  () => user.value?.color,
-  (color: string | undefined) => {
-    if (color) displayColor.value = color
-  },
-)
+const displayColor = ref(user.value?.color ?? DEFAULT_USER_COLOR)
+watch(() => user.value?.color, (color) => {
+  if (color) displayColor.value = color
+})
 
-const newPassword = ref<string>('')
-const confirmPassword = ref<string>('')
-const saveMessage = ref<string>('')
-const passwordError = ref<string>('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+const saveMessage = ref('')
+const passwordError = ref('')
 
 async function saveAll() {
   passwordError.value = ''
@@ -53,8 +45,8 @@ async function saveAll() {
   try {
     if (displayName.value.trim()) await updateName(displayName.value)
     await updateColor(displayColor.value)
-  } catch (error: any) {
-    useToast().error(`儲存失敗：${error.message}`)
+  } catch (error) {
+    toast.error(`儲存失敗：${errorMessage(error)}`)
     return
   }
   newPassword.value = ''

@@ -16,7 +16,7 @@ interface UserDoc {
   createdAt?: string
 }
 
-const DEFAULT_COLOR = '#10b981'
+export const DEFAULT_USER_COLOR = '#10b981'
 
 function formatJoinedAt(iso?: string): string {
   const date = iso ? new Date(iso) : new Date()
@@ -28,7 +28,7 @@ function toAppUser(data: UserDoc): AppUser {
     uid: data.uid,
     name: data.name,
     joinedAt: formatJoinedAt(data.createdAt),
-    color: data.color ?? DEFAULT_COLOR,
+    color: data.color ?? DEFAULT_USER_COLOR,
   }
 }
 
@@ -36,6 +36,10 @@ function toAppUser(data: UserDoc): AppUser {
 export function useAuth() {
   const user = useState<AppUser | null>('auth-user', () => null)
   const { $fbAuth, $fbDb } = useNuxtApp()
+
+  function userRef(uid: string) {
+    return doc($fbDb, 'users', uid)
+  }
 
   /** 依 Firebase 登入狀態，從 Firestore 讀回使用者資料 */
   async function syncUser(fbUser: User | null) {
@@ -46,7 +50,7 @@ export function useAuth() {
     // login() 已經設好同一位使用者時不必重讀，也避免讀到尚未寫入的文件而把 user 清空
     if (user.value?.uid === fbUser.uid) return
 
-    const snapshot = await getDoc(doc($fbDb, 'users', fbUser.uid))
+    const snapshot = await getDoc(userRef(fbUser.uid))
     // 已登入但還沒寫過暱稱，視同未登入，讓使用者到登入頁補填
     if (snapshot.exists()) user.value = toAppUser(snapshot.data() as UserDoc)
   }
@@ -58,7 +62,7 @@ export function useAuth() {
     // 同一個瀏覽器會沿用原本的 uid
     const credential = await signInAnonymously($fbAuth)
     const { uid } = credential.user
-    const ref = doc($fbDb, 'users', uid)
+    const ref = userRef(uid)
 
     // createdAt、color 只在首次建立文件時寫入，之後只更新暱稱
     const isNewUser = getAdditionalUserInfo(credential)?.isNewUser ?? false
@@ -69,7 +73,7 @@ export function useAuth() {
       await updateDoc(ref, { name })
       user.value = toAppUser({ ...existing, name })
     } else {
-      const data: UserDoc = { uid, name, color: DEFAULT_COLOR, createdAt: new Date().toISOString() }
+      const data: UserDoc = { uid, name, color: DEFAULT_USER_COLOR, createdAt: new Date().toISOString() }
       await setDoc(ref, data)
       user.value = toAppUser(data)
     }
@@ -80,15 +84,16 @@ export function useAuth() {
     user.value = null
   }
 
-  async function updateName(name: string) {
-    if (!user.value || !name.trim()) return
-    await updateDoc(doc($fbDb, 'users', user.value.uid), { name: name.trim() })
-    user.value = { ...user.value, name: name.trim() }
+  async function updateName(newName: string) {
+    const name = newName.trim()
+    if (!user.value || !name) return
+    await updateDoc(userRef(user.value.uid), { name })
+    user.value = { ...user.value, name }
   }
 
   async function updateColor(color: string) {
     if (!user.value || !color.trim()) return
-    await updateDoc(doc($fbDb, 'users', user.value.uid), { color })
+    await updateDoc(userRef(user.value.uid), { color })
     user.value = { ...user.value, color }
   }
 

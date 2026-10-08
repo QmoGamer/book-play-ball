@@ -1,5 +1,18 @@
 # VERSION-LOG
 
+### v0.4.2 - 2026-10-08
+
+- refactor(utils): 新增 errorMessage 統一錯誤訊息取法，避免丟出非 Error 物件時 toast 顯示 undefined
+- refactor(utils): 新增 parseDateKey，取代彈窗與我的預約頁重複的日期字串解析
+- refactor(middleware): 新增具名 auth middleware，取代各頁面重複的登入檢查
+- refactor(components): 抽出 AppLogoIcon 與 UserAvatar，消除導覽列與登入頁複製貼上的 SVG 與頭像
+- refactor(auth): 抽出 userRef 並匯出 DEFAULT_USER_COLOR，避免 Firestore 路徑與預設色散落各處
+- refactor(my-bookings): 以 TABS 設定合併兩組幾乎相同的分頁與清單樣板，降低日後修改要改兩處的風險
+- refactor(index): 合併上下月切換為 shiftMonth，並預先計算每格名單，讓月曆樣板更易讀
+- refactor(booking-modal): 將樣板中的巢狀三元運算移至 computed，提升可讀性
+- style: 移除可推論的型別標註並統一 firebase plugin 的引號與分號寫法
+- fix(login): 暱稱欄位的 label 補上 for/id，點擊標籤即可聚焦輸入框
+
 ### v0.4.1 - 2026-10-06
 
 - feat(ui): 登入、預約、取消預約、登出按鈕加上載入中狀態並防止重複點擊，避免等待 API 時畫面像卡住

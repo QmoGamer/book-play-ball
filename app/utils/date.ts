@@ -1,11 +1,17 @@
 export const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
 
 export function pad2(n: number) {
-  return n < 10 ? `0${n}` : `${n}`
+  return String(n).padStart(2, '0')
 }
 
 export function formatDateKey(date: Date) {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`
+}
+
+/** 2026-10-20 -> 當地時間的 Date 物件 */
+export function parseDateKey(key: string) {
+  const [y, m, d] = key.split('-').map(Number)
+  return new Date(y!, m! - 1, d)
 }
 
 /** 2026-10-20 -> 10/20 */

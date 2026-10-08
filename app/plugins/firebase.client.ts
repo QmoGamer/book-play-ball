@@ -1,17 +1,17 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore"
-import { getAuth } from "firebase/auth"
+import { initializeApp } from 'firebase/app'
+import { getFirestore } from 'firebase/firestore'
+import { getAuth } from 'firebase/auth'
 
 export default defineNuxtPlugin({
   name: 'firebase',
   setup() {
     const firebaseConfig = {
-      apiKey: "AIzaSyD0kH_FuPEX-vnpzdbO5Bkupz2daXFMaCY",
-      authDomain: "qmo-prod-1.firebaseapp.com",
-      projectId: "qmo-prod-1",
-      storageBucket: "qmo-prod-1.firebasestorage.app",
-      messagingSenderId: "354515708719",
-      appId: "1:354515708719:web:0f9b8dc47feef428164fda"
+      apiKey: 'AIzaSyD0kH_FuPEX-vnpzdbO5Bkupz2daXFMaCY',
+      authDomain: 'qmo-prod-1.firebaseapp.com',
+      projectId: 'qmo-prod-1',
+      storageBucket: 'qmo-prod-1.firebasestorage.app',
+      messagingSenderId: '354515708719',
+      appId: '1:354515708719:web:0f9b8dc47feef428164fda',
     }
 
     // 初始化 Firebase
