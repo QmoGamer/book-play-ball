@@ -17,6 +17,8 @@ const cells = computed(() => buildMonthGrid(viewYear.value, viewMonth.value).map
   ...cell,
   entries: listFor(cell.key),
   booked: isBooked(cell.key),
+  // 早於今天的日期不能預約
+  disabled: !cell.inCurrentMonth || cell.key < todayKey,
 })))
 
 function showMonth(date: Date) {
@@ -29,7 +31,7 @@ function shiftMonth(delta: number) {
 }
 
 function dayNumberClass(cell: CalendarCell) {
-  if (!cell.inCurrentMonth) return 'text-slate-300'
+  if (!cell.inCurrentMonth || cell.key < todayKey) return 'text-slate-300'
   return cell.key === todayKey ? 'bg-emerald-600 text-white' : 'text-slate-700'
 }
 
@@ -37,6 +39,7 @@ const modalOpen = ref(false)
 const activeDateKey = ref<string | null>(null)
 
 function openDay(key: string) {
+  if (key < todayKey) return
   activeDateKey.value = key
   modalOpen.value = true
 }
@@ -87,8 +90,9 @@ onMounted(() => {
           v-for="cell in cells"
           :key="cell.key"
           class="min-h-[92px] border-b border-r border-slate-100 p-1.5 transition sm:min-h-[130px] sm:p-2"
-          :class="cell.inCurrentMonth ? 'cursor-pointer hover:bg-slate-50' : 'bg-slate-50/60'"
-          @click="cell.inCurrentMonth && openDay(cell.key)"
+          :class="cell.disabled ? 'cursor-not-allowed bg-slate-50/60' : 'cursor-pointer hover:bg-slate-50'"
+          :aria-disabled="cell.disabled"
+          @click="!cell.disabled && openDay(cell.key)"
         >
           <div class="flex items-center justify-between">
             <span
@@ -104,7 +108,7 @@ onMounted(() => {
             />
           </div>
 
-          <div v-if="cell.inCurrentMonth" class="mt-1.5 space-y-1">
+          <div v-if="cell.inCurrentMonth" class="mt-1.5 space-y-1" :class="{ 'opacity-50': cell.disabled }">
             <div
               v-for="(entry, idx) in cell.entries.slice(0, MAX_VISIBLE)"
               :key="entry.uid"
@@ -115,7 +119,8 @@ onMounted(() => {
             </div>
             <button
               v-if="cell.entries.length > MAX_VISIBLE"
-              class="text-[11px] font-semibold text-emerald-600 hover:underline sm:text-xs"
+              :disabled="cell.disabled"
+              class="text-[11px] font-semibold text-emerald-600 hover:underline disabled:cursor-not-allowed disabled:text-slate-400 disabled:no-underline sm:text-xs"
               @click.stop="openDay(cell.key)"
             >
               +還有 {{ cell.entries.length - MAX_VISIBLE }} 人...

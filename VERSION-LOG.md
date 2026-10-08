@@ -1,5 +1,9 @@
 # VERSION-LOG
 
+### v0.4.3 - 2026-10-08
+
+- feat(index): 停用今天以前的月曆日期，避免使用者預約已經過去的日子
+
 ### v0.4.2 - 2026-10-08
 
 - refactor(utils): 新增 errorMessage 統一錯誤訊息取法，避免丟出非 Error 物件時 toast 顯示 undefined
